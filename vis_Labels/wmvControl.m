@@ -89,9 +89,15 @@ function wmvControl(action)
         
             data.start_time = datetime(data.start_time, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
             data.end_time = datetime(data.end_time, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
-            % Add only the fractional seconds from the Unix timestamps
-            data.start_time = data.start_time + seconds(mod(data.start_time_sec,1));
-            data.end_time   = data.end_time   + seconds(mod(data.end_time_sec,1));
+            
+            % Only add fractional seconds if the timestamp has no milliseconds
+            needsFix = millisecond(data.start_time) == 0;
+            
+            data.start_time(needsFix) = ...
+                data.start_time(needsFix) + seconds(mod(data.start_time_sec(needsFix),1));
+            
+            data.end_time(needsFix) = ...
+                data.end_time(needsFix) + seconds(mod(data.end_time_sec(needsFix),1));
             
             excelEpoch = datetime(2000,1,0);
             
