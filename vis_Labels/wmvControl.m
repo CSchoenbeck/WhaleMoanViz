@@ -91,7 +91,7 @@ function wmvControl(action)
             data.end_time = datetime(data.end_time, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
             
             % Only add fractional seconds if the timestamp has no milliseconds
-            needsFix = millisecond(data.start_time) == 0;
+            needsFix = mod(second(data.start_time), 1) == 0;
             
             data.start_time(needsFix) = ...
                 data.start_time(needsFix) + seconds(mod(data.start_time_sec(needsFix),1));
