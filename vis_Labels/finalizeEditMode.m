@@ -55,10 +55,9 @@ function finalizeEditMode(event)
             startTime = excelEpoch + days(startTimeDays); 
             endTime = excelEpoch + days(endTimeDays);
             
-            % calculate start and end times in seconds relative to the beginning of the WAV file
-            wav_start_time_days = PARAMS.raw.dnumStart;  % Start time in datenum format
+            % Convert the WAV start time to datetime format
+            wav_start_time_days = PARAMS.raw.dnumStart(1);  % Start time in datenum format
             wav_start_datetime = excelEpoch + days(wav_start_time_days);  % Convert to datetime
-    
             % calculate start time in seconds relative to the WAV file start
             start_time_sec = seconds(startTime - wav_start_datetime);  % Time difference in seconds
             end_time_sec = seconds(endTime - wav_start_datetime);  % Time difference in seconds
