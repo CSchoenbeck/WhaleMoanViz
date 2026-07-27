@@ -2,7 +2,7 @@
 
 % REMORA.lt.lVis_det.labels = {'A', 'B', 'D', '20Hz', '40Hz'};            % Call types
 REMORA.lt.lVis_det.labels = {'Bm_A_North_Atlantic', 'Ba_pulse-call', 'Bp_20Hz', 'Bp_40Hz', 'Bb_down-sweep'};            % Call types
-REMORA.lt.lVis_det.wmdFolder = 'F:/Tools/WhaleMoanDetector-main';          % Where your WhaleMoanDetector folder is
+REMORA.lt.lVis_det.wmdFolder = 'F:/Tools/WhaleMoanDetectorGit';          % Where your WhaleMoanDetector folder is
 REMORA.lt.lVis_det.pyenvFolder = 'C:/Users/HARP/.conda/envs/whalemoandetector';  % Where your whalemoandetector python environment is
 % %% config.m
 % % Configuration for WhaleMoanViz

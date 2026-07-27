@@ -86,23 +86,26 @@ function wmvControl(action)
         else
             % sort by the 'start_time' column
             data = sortrows(data, 'start_time');
-        
+
+            % % Only add fractional seconds if the timestamp has no milliseconds
+            % needsFix = mod(second(data.start_time), 1) == 0;
+            % 
+            % data.start_time(needsFix) = ...
+            %     data.start_time(needsFix) + seconds(mod(data.start_time_sec(needsFix),1));
+            % 
+            % data.end_time(needsFix) = ...
+            %     data.end_time(needsFix) + seconds(mod(data.end_time_sec(needsFix),1));
+            
             data.start_time = datetime(data.start_time, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
             data.end_time = datetime(data.end_time, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
-            
-            % Only add fractional seconds if the timestamp has no milliseconds
-            needsFix = mod(second(data.start_time), 1) == 0;
-            
-            data.start_time(needsFix) = ...
-                data.start_time(needsFix) + seconds(mod(data.start_time_sec(needsFix),1));
-            
-            data.end_time(needsFix) = ...
-                data.end_time(needsFix) + seconds(mod(data.end_time_sec(needsFix),1));
-            
+            % Add only the fractional seconds from the Unix timestamps
+            Starts_time = data.start_time;
+            Stops_time   = data.end_time;
+
             excelEpoch = datetime(2000,1,0);
             
-            Starts = days(data.start_time - excelEpoch);
-            Stops  = days(data.end_time - excelEpoch);
+            Starts = days(Starts_time - excelEpoch);
+            Stops  = days(Stops_time - excelEpoch);
         
             % add frequency and score
             Labels = data.label;
