@@ -28,7 +28,8 @@ function finalizeAddDetectionMode(~,~)
          % Save the new detection
         pos = REMORA.tempRect.Position;
                          
-        startWV = PARAMS.plot.dnum;  % Spectrogram window start time in datenum format
+%         startWV = PARAMS.plot.dnum;  % Spectrogram window start time in datenum format
+startWV = REMORA.tempRectStartWV;  % use the reference captured when the box was started, not a fresh read CMS edit
 
         % Convert seconds to datenum and calculate absolute start and end times
         startTimeDays = startWV + pos(1) / (24 * 3600);  % Convert seconds offset to days

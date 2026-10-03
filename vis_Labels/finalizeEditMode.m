@@ -44,7 +44,8 @@ function finalizeEditMode(event)
             
             % convert editedRect position to absolute datenums
             pos = editedRect.Position;
-            startWV = PARAMS.plot.dnum;  % spectrogram window start time in datenum format
+%             startWV = PARAMS.plot.dnum;  % spectrogram window start time in datenum format -  CMS edit
+startWV = REMORA.lt.lVis_det.currentEdit.startWV;  % use the reference captured when editing began, not a fresh read
             
             excelEpoch = datetime(2000, 1, 0);  % reference epoch
             % calculate absolute start and end times in "days since epoch"
