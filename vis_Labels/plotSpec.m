@@ -28,6 +28,34 @@ function plotSpec
     end
     REMORA.lt.lVis_det.overlayHandles = gobjects(0);
 
+    % ---------------------------------------------------------------------
+    % Delete orphaned axes toolbars.
+    %
+    % Every time plot_specgram / plot_timeseries redraw, newplot resets the
+    % axes and MATLAB builds a fresh axestoolbar. The old one is not
+    % destroyed with it -- it stays parented to the figure, along with its
+    % ~10 buttons and ~11 internal objects, and nothing ever removes it.
+    % Measured at roughly 20 stranded objects per axes reset, which is
+    % unbounded over a session and slows every later subplot()/figure()
+    % call, exactly as the per-box context menus used to.
+    %
+    % Keep whichever toolbar each live axes currently owns, bin the rest.
+    % ---------------------------------------------------------------------
+    staleBars = findall(HANDLES.fig.main, 'Type', 'axestoolbar');
+    if ~isempty(staleBars)
+        keepBar = false(size(staleBars));
+        axList = findall(HANDLES.fig.main, 'Type', 'axes');
+        for iAx = 1:numel(axList)
+            if isprop(axList(iAx), 'Toolbar')
+                tb = axList(iAx).Toolbar;
+                if ~isempty(tb) && isgraphics(tb)
+                    keepBar = keepBar | (staleBars == tb);
+                end
+            end
+        end
+        delete(staleBars(~keepBar));
+    end
+
     % create start and end times of window
     startWV = PARAMS.plot.dnum;
     winLength = HANDLES.subplt.specgram.XLim(2); % get length of window in seconds, used to compute end limit
