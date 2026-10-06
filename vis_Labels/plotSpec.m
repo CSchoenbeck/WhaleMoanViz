@@ -77,14 +77,39 @@ function plotSpec
     end
 
     if REMORA.lt.lVis_det.detection.PlotLabels
-        % find detections within the spectrogram window
-        [Lo, Hi] = getDetectionRange(startWV, endWV, ...
-            REMORA.lt.lVis_det.detection.starts, ...
-            REMORA.lt.lVis_det.detection.stops);
+        % ---------------------------------------------------------------
+        % Select every detection that OVERLAPS the window, so a box
+        % straddling a window boundary is drawn (clipped) in BOTH windows
+        % rather than only the one its start time happens to fall in.
+        %
+        % Overlap test: start <= endWV AND stop >= startWV.
+        %
+        % getDetectionRange is deliberately not used here. It binary-searches
+        % both the starts and the stops arrays, but only starts is sorted --
+        % stops is held in start_time order, and detections vary in duration,
+        % so a binary search over stops can miss a box that began before this
+        % window. Bound the candidates using the longest detection in the
+        % file, then test overlap exactly.
+        % ---------------------------------------------------------------
+        detStarts = REMORA.lt.lVis_det.detection.starts;
+        detStops  = REMORA.lt.lVis_det.detection.stops;
+
+        maxDur = max(detStops - detStarts);
+        if isempty(maxDur) || ~isfinite(maxDur)
+            maxDur = 0;
+        end
+
+        % anything overlapping the window must start in this span
+        plotIdx = find(detStarts >= (startWV - maxDur) & detStarts <= endWV);
+        if ~isempty(plotIdx)
+            plotIdx = plotIdx(detStops(plotIdx) >= startWV);   % exact overlap
+        end
 
         % filter to only plot detections with pr = 1, 2, or 3
-        validIdx = find(REMORA.lt.lVis_det.detection.pr(Lo:Hi) == 1 | REMORA.lt.lVis_det.detection.pr(Lo:Hi) == 2 | REMORA.lt.lVis_det.detection.pr(Lo:Hi) == 3);
-        plotIdx = Lo - 1 + validIdx;  % Adjust indices to match original array indexing
+        if ~isempty(plotIdx)
+            prVals = REMORA.lt.lVis_det.detection.pr(plotIdx);
+            plotIdx = plotIdx(prVals == 1 | prVals == 2 | prVals == 3);
+        end
 %%
         % Filter by selected labels, if the filter is active
         if isfield(REMORA.lt.lVis_det, 'selectedLabels') && ...
@@ -206,8 +231,11 @@ function plot_labels_wav(plotIdx, yPos, colors, startWV, endWV, finalDet)
         end
 
         % display the label and score at the start of each detection
-        labelText = text(HANDLES.subplt.specgram, detXstart(iPlot), maxFreq + 9, thislabel, 'Color', color, 'FontWeight', 'normal');
-        scoreText = text(HANDLES.subplt.specgram, detXstart(iPlot), maxFreq + 3, sprintf('%.2f', score), ...
+        % a box carried over from the previous window starts at a negative
+        % x; pin its label to the left edge so it stays readable
+        txtX = max(detXstart(iPlot), 0);
+        labelText = text(HANDLES.subplt.specgram, txtX, maxFreq + 9, thislabel, 'Color', color, 'FontWeight', 'normal');
+        scoreText = text(HANDLES.subplt.specgram, txtX, maxFreq + 3, sprintf('%.2f', score), ...
              'Color', color, 'FontWeight', 'bold');
         nH = nH + 1;  newHandles(nH) = labelText;
         nH = nH + 1;  newHandles(nH) = scoreText;
