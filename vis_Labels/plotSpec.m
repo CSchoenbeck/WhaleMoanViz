@@ -169,14 +169,16 @@ function plot_labels_wav(plotIdx, yPos, colors, startWV, endWV, finalDet)
     % edited currently.
     LineThresh = 0;
 
-    % Note: every box shares a single right-click menu (wmvSharedMenu), which
-    % builds its items when opened from the detection index stored in that
-    % box's UserData -- no per-box uicontextmenu is created here any more.
+    % Each box gets its own right-click menu again, as it always did -- but
+    % every one is now recorded in newHandles and deleted at the top of the
+    % next call. That keeps the figure bounded (which is what actually caused
+    % the slowdown) without the shared-menu indirection, which depended on
+    % resolving the clicked object at menu-open time and broke Mark TP.
 
-    % collect the handles of everything drawn below (rectangle + patch + two
-    % text objects per box, at most, plus the end-of-file line)
+    % collect the handles of everything drawn below (rectangle + patch +
+    % context menu + two text objects per box, plus the end-of-file line)
     nDet = numel(plotIdx);
-    newHandles = gobjects(4*nDet + 1, 1);
+    newHandles = gobjects(5*nDet + 1, 1);
     nH = 0;
 
     % loop through each detection to plot with label, frequency range, and score
@@ -207,9 +209,12 @@ function plot_labels_wav(plotIdx, yPos, colors, startWV, endWV, finalDet)
             rectHandle.ButtonDownFcn = @(src, ~) editBoundingBox(src, absIdx, ...
                 detXstart(iPlot), detXend(iPlot), ...
                 minFreq, maxFreq, thislabel, score, color);
-            % tag with the detection index and attach the shared menu
-            wmvSharedMenu('attach', rectHandle, absIdx);
+            % per-box right-click menu, tracked for deletion next redraw
+            clickMenu = wmvClickMenu('GetMenu', absIdx);
+            rectHandle.UserData = absIdx;
+            setCtxMenu(rectHandle, clickMenu);
             nH = nH + 1;  newHandles(nH) = rectHandle;
+            nH = nH + 1;  newHandles(nH) = clickMenu;
 
             % overlay a clickable transparent patch (allows user to select
             % rectangle by clicking inside)
@@ -225,7 +230,8 @@ function plot_labels_wav(plotIdx, yPos, colors, startWV, endWV, finalDet)
             clickPatch.ButtonDownFcn = @(src, ~) editBoundingBox(src, absIdx, ...
                 detXstart(iPlot), detXend(iPlot), ...
                 minFreq, maxFreq, thislabel, score, color);
-            wmvSharedMenu('attach', clickPatch, absIdx);
+            clickPatch.UserData = absIdx;
+            setCtxMenu(clickPatch, clickMenu);
             nH = nH + 1;  newHandles(nH) = clickPatch;
 
         end
@@ -252,5 +258,18 @@ function plot_labels_wav(plotIdx, yPos, colors, startWV, endWV, finalDet)
     REMORA.lt.lVis_det.overlayHandles = newHandles(1:nH);
 
     hold(HANDLES.subplt.specgram, 'off');
+
+end
+
+
+function setCtxMenu(h, cm)
+
+% setCtxMenu: attach a context menu, using whichever property this MATLAB has
+
+    if isprop(h, 'ContextMenu')
+        h.ContextMenu = cm;      % R2020a and later
+    else
+        h.UIContextMenu = cm;    % older releases
+    end
 
 end

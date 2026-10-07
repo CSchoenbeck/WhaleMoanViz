@@ -23,10 +23,19 @@ function editBoundingBox(src, detectionIdx, startX, endX, minY, maxY, label, sco
     editedRect = drawrectangle('Position', [startX, minY, endX - startX, maxY - minY], ...
                                'Color', 'cyan', 'LineWidth', 2);
 
-    % attach the single shared right-click menu (see wmvSharedMenu) rather
-    % than building a new uicontextmenu per click -- those were never
-    % deleted and piled up on the figure for the whole session
-    wmvSharedMenu('attach', editedRect, detectionIdx);
+    % own right-click menu, as before -- but registered in overlayHandles so
+    % the next plotSpec deletes it instead of leaving it on the figure
+    clickMenu = wmvClickMenu('GetMenu', detectionIdx);
+    if isprop(editedRect, 'ContextMenu')
+        editedRect.ContextMenu = clickMenu;
+    else
+        editedRect.UIContextMenu = clickMenu;
+    end
+    if isfield(REMORA.lt.lVis_det, 'overlayHandles')
+        REMORA.lt.lVis_det.overlayHandles(end+1) = clickMenu;
+    else
+        REMORA.lt.lVis_det.overlayHandles = clickMenu;
+    end
     disp('Interactive bounding box created.');
 
     % save the initial rectangle properties in currentEdit
