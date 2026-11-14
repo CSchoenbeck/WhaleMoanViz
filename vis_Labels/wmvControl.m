@@ -43,6 +43,14 @@ function wmvControl(action)
         
         % store the file path globally
         REMORA.lt.lVis_det.fileFullPath = fileFullPath;
+        % new label file: forget where the previous session saved, so its
+        % saves can't overwrite an existing verified file unprompted
+        if isfield(REMORA.lt.lVis_det, 'saveFilePath')
+            REMORA.lt.lVis_det = rmfield(REMORA.lt.lVis_det, 'saveFilePath');
+        end
+        if isfield(REMORA.lt.lVis_det, 'verifiedFilePath')
+            REMORA.lt.lVis_det = rmfield(REMORA.lt.lVis_det, 'verifiedFilePath');
+        end
         data = readtable(fileFullPath, 'Delimiter', '\t', 'ReadVariableNames', true);
         
         if height(data) == 0
@@ -168,7 +176,13 @@ function wmvControl(action)
            return
         end
         fileFullPath = fullfile(path, filename);
-        REMORA.lt.lVis_det.fileFullPath = fileFullPath;  
+        REMORA.lt.lVis_det.fileFullPath = fileFullPath;
+        if isfield(REMORA.lt.lVis_det, 'saveFilePath')
+            REMORA.lt.lVis_det = rmfield(REMORA.lt.lVis_det, 'saveFilePath');
+        end
+        if isfield(REMORA.lt.lVis_det, 'verifiedFilePath')
+            REMORA.lt.lVis_det = rmfield(REMORA.lt.lVis_det, 'verifiedFilePath');
+        end
         
 
         % open WMV window and modify for label creation mode
@@ -422,6 +436,11 @@ function wmvControl(action)
     % callback function for saving the current edits
         if isfield(REMORA.lt.lVis_det, 'fileFullPath')
             saveEditedDetections(REMORA.lt.lVis_det.fileFullPath);
+        else
+            disp('Edits were NOT saved: no label file is loaded.');
+            errordlg(['Edits were NOT saved: no label file is loaded. ', ...
+                'Load predictions (or create a new label file) before saving.'], ...
+                'Save failed', 'replace');
         end
 
 
