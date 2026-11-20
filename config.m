@@ -1,7 +1,18 @@
 % config: contains project-specific parameters that may be swapped out
 
-% REMORA.lt.lVis_det.labels = {'A', 'B', 'D', '20Hz', '40Hz'};            % Call types
-REMORA.lt.lVis_det.labels = {'Bm_A_North_Atlantic', 'Ba_pulse-call', 'Bp_20Hz', 'Bp_40Hz', 'Bb_down-sweep'};            % Call types
+% ---- region switch: 'Atlantic' or 'Pacific' ----
+wmvRegion = 'Pacific';
+
+switch wmvRegion
+    case 'Atlantic'
+        REMORA.lt.lVis_det.labels = {'Bm_A_North_Atlantic', 'Ba_pulse-call', ...
+                                     'Bp_20Hz', 'Bp_40Hz', 'Bb_down-sweep'};
+    case 'Pacific'
+        REMORA.lt.lVis_det.labels = {'A', 'B', 'D', '20Hz', '40Hz', 'M3', 'Be4','Ej_gunshot'};   % <-- your Pacific call types here
+    otherwise
+        error('config: unknown wmvRegion ''%s'' — use ''Atlantic'' or ''Pacific''.', wmvRegion);
+end
+
 REMORA.lt.lVis_det.wmdFolder = 'F:/Tools/WhaleMoanDetectorGit';          % Where your WhaleMoanDetector folder is
 REMORA.lt.lVis_det.pyenvFolder = 'C:/Users/HARP/.conda/envs/whalemoandetector';  % Where your whalemoandetector python environment is
 % %% config.m
