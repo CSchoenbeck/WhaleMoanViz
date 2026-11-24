@@ -1,16 +1,17 @@
 % config: contains project-specific parameters that may be swapped out
 
 % ---- region switch: 'Atlantic' or 'Pacific' ----
-wmvRegion = 'Pacific';
+REMORA.lt.lVis_det.region = 'Pacific';
 
-switch wmvRegion
+switch REMORA.lt.lVis_det.region
     case 'Atlantic'
         REMORA.lt.lVis_det.labels = {'Bm_A_North_Atlantic', 'Ba_pulse-call', ...
                                      'Bp_20Hz', 'Bp_40Hz', 'Bb_down-sweep'};
     case 'Pacific'
         REMORA.lt.lVis_det.labels = {'A', 'B', 'D', '20Hz', '40Hz', 'M3', 'Be4','Ej_gunshot'};   % <-- your Pacific call types here
     otherwise
-        error('config: unknown wmvRegion ''%s'' — use ''Atlantic'' or ''Pacific''.', wmvRegion);
+        error('config: unknown region ''%s'' — use ''Atlantic'' or ''Pacific''.', ...
+              REMORA.lt.lVis_det.region);
 end
 
 REMORA.lt.lVis_det.wmdFolder = 'F:/Tools/WhaleMoanDetectorGit';          % Where your WhaleMoanDetector folder is
